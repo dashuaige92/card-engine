@@ -82,6 +82,10 @@ class DealPhase(Phase):
             self.receiving_piles[index].draw_from(self.main_pile)
             index = (index + 1) % len(self.receiving_piles)
 
+    def exit(self):
+        for p in self.receiving_piles:
+            p.sort()
+
 class PileGroup(object):
     """
     This class aggregates Piles of various sorts

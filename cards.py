@@ -38,6 +38,15 @@ class PokerCard(Card):
             return ('Big' if 2 else 'Little') + ' ' + self.attr['suit']
         face_cards = {1: 'A', 11: 'J', 12: 'Q', 13: 'K'}
         return str(face_cards.get(self.attr['number'], self.attr['number'])) + ' of ' + self.attr['suit']
+
+    def __cmp__(self, other):
+        for c in self.deck.cards:
+            if c is self:
+                return -1
+            elif c is other:
+                return 1
+        raise CardNotFoundError
+        return 0
         
 class Deck(object):
     """
@@ -56,7 +65,7 @@ class Deck(object):
         self.cards = cards
 
     def __str__(self):
-        return self.cards.__str__()
+        return '[' + ', '.join([str(x) for x in self.cards]) + ']'
 
 class PokerDeck(Deck):
     """
@@ -68,14 +77,25 @@ class PokerDeck(Deck):
     Ex. Sanguosha Deck, Yomi Deck
     """
     def __init__(self, cards=None, preset=True, jokers=False, number_range=range(1, 14), num_decks=1):
+        # If preset is True, ignore cards parameter and generate a deck from other attributes
         if preset:
             cards = [PokerCard(suit=x, number=y, deck=self) for y in number_range for x in ['spades', 'hearts', 'diamonds', 'clubs']]
             if jokers:
-                cards += [PokerCard(suit='joker', number=1, deck=self), PokerCard(suit='joker', number=2, deck=self)]
+                cards += [PokerCard(suit='joker', number=14, deck=self), PokerCard(suit='joker', number=15, deck=self)]
             cards *= num_decks
-        #preset False -> cards explicitly defined and stored
-        self.cards = cards
         Deck.__init__(self, cards)
+        self.set_order()
+
+    def set_order(self, priority='number', number_rank=range(1, 14), suit_rank=['diamonds', 'clubs', 'hearts', 'spades', 'jokers']):
+        cards = self.cards
+        print(priority)
+        if priority == 'number':
+            cards.sort(key=lambda x: suit_rank.index(x.attr['suit']))
+            cards.sort(key=lambda x: number_rank.index(x.attr['number']))
+        elif priority == 'suit':
+            cards.sort(key=lambda x: number_rank.index(x.attr['number']))
+            cards.sort(key=lambda x: suit_rank.index(x.attr['suit']))
+
 
 class Pile(object):
     """
@@ -116,8 +136,7 @@ class Pile(object):
         
     def draw_from(self, pile):
         if not pile.cards:
-            print("EmptyPile")
-            #raise EmptyPileError
+            raise EmptyPileError
         else:
             card = pile.take_cards()
             self.cards += card

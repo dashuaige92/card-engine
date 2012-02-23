@@ -28,7 +28,8 @@ class SetupTest(unittest.TestCase):
                 })
             self.phases = [DealPhase(
                 main_pile=self.pile_groups['init'].piles['init'],
-                receiving_piles=[self.pile_groups[p].piles['hand'] for p in self.players])]
+                receiving_piles=[self.pile_groups[p].piles['hand'] for p in self.players] 
+                )]
         
     def setUp(self):
         '''
@@ -38,6 +39,7 @@ class SetupTest(unittest.TestCase):
 
     def test_deal(self):
         self.assertEqual(len(self.game.pile_groups['init'].piles['init'].cards), 52)
+        print(self.game.pile_groups['init'].piles['init'])
         self.game.run()
         self.assertIsInstance(self.game.pile_groups, dict)
         self.assertEqual(len(self.game.pile_groups['init'].piles['init'].cards), 0)
